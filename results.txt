@@ -1,0 +1,10 @@
+Cable - Average IoU: 0.9664
+Wood - Average IoU: 0.9188
+Grid - Average IoU: 0.8863
+Leather - Average IoU: 0.8957
+Metal Nut - Average IoU: 0.9147
+Screw - Average IoU: 0.8947
+Tile - Average IoU: 0.9162
+Transistor - Average IoU: 0.8934
+
+Classification -- Accuracy: 0.9623
