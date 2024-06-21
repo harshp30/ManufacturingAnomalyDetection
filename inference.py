@@ -129,7 +129,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 path = ''
 image_path = f'{path}/training_data/cable/test/images/test_image_0.png'
 segmentation_models_base_path = f'{path}/models'
-output_dir = f'{path}/output'
+output_dir = f'{path}/images'
 classification_model_path = f'{path}/models/classification/model.pth'
 
 # Ensure the output directory exists
