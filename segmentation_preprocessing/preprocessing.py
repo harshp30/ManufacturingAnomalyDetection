@@ -5,23 +5,48 @@ from sklearn.model_selection import train_test_split
 import cv2
 
 # Paths
-stripped_data_path = '/home/paperspace/Projects/ManufacturingAnomalyDetection/augmented_data/transistor'
-processed_data_path = '/home/paperspace/Projects/ManufacturingAnomalyDetection/training_data/transistor'
+path = ''
+stripped_data_path = f'{path}/augmented_data/transistor'
+processed_data_path = f'{path}/training_data/transistor'
 
 # Ensure directories exist
 def ensure_dirs(paths):
+    """
+    Ensure that the directories in the given list exist. If a directory does not exist, create it.
+
+    Parameters:
+    paths (list of str): List of directory paths to ensure exist.
+    """
     for path in paths:
         os.makedirs(path, exist_ok=True)
 
 # Function to resize images and masks to a consistent size
 def resize_image_and_mask(image, mask, size=(256, 256)):
+    """
+    Resize the given image and mask to the specified size.
+
+    Parameters:
+    image (ndarray): The image to resize.
+    mask (ndarray): The mask to resize.
+    size (tuple of int): The target size (height, width) for the image and mask.
+
+    Returns:
+    tuple: Resized image and mask.
+    """
     resized_image = cv2.resize(image, size)
     resized_mask = cv2.resize(mask, size, interpolation=cv2.INTER_NEAREST)
     return resized_image, resized_mask
 
 # Function to split data into training, validation, and testing sets with oversampling
 def split_data(stripped_data_path, processed_data_path):
-    # Categories
+    """
+    Split the data into training, validation, and testing sets with oversampling to balance classes.
+
+    Parameters:
+    stripped_data_path (str): Path to the directory containing the original images and masks.
+    processed_data_path (str): Path to the directory where the processed data will be saved.
+    """
+    # Categories of flaws including 'good'
     categories = ['good', 'bent_lead', 'cut_lead', 'damaged_case', 'misplaced']
     
     # Ensure training, validation, and testing directories exist
@@ -39,6 +64,7 @@ def split_data(stripped_data_path, processed_data_path):
     labels = []
     
     for category in categories:
+        # Find all images for the current category
         image_files = [f for f in os.listdir(stripped_data_path) if f.startswith(category) and f.endswith('_image.png')]
         
         # Debugging: Print the number of images found for each category
@@ -93,6 +119,14 @@ def split_data(stripped_data_path, processed_data_path):
     
     # Save images and masks
     def save_images_and_masks(images, masks, set_name):
+        """
+        Save the given images and masks to the specified dataset directory.
+
+        Parameters:
+        images (ndarray): Array of images to save.
+        masks (ndarray): Array of masks to save.
+        set_name (str): The name of the dataset split (e.g., 'train', 'val', 'test').
+        """
         for i in range(len(images)):
             image_path = os.path.join(processed_data_path, set_name, 'images', f'{set_name}_image_{i}.png')
             mask_path = os.path.join(processed_data_path, set_name, 'masks', f'{set_name}_mask_{i}.png')

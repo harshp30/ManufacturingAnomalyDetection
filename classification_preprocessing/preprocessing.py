@@ -4,17 +4,32 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 
 # Paths
-input_data_path = '/home/paperspace/Projects/ManufacturingAnomalyDetection/classification_data/classification_images'
-labels_file_path = '/home/paperspace/Projects/ManufacturingAnomalyDetection/classification_data/labels.txt'
-output_data_path = '/home/paperspace/Projects/ManufacturingAnomalyDetection/training_data/classification'
+path = ''
+input_data_path = f'{path}/classification_data/classification_images'
+labels_file_path = f'{path}/classification_data/labels.txt'
+output_data_path = f'{path}/training_data/classification'
 
 # Ensure directories exist
 def ensure_dirs(paths):
+    """
+    Ensure that the specified directories exist. If they do not, create them.
+
+    Parameters:
+    paths (list): List of directory paths to check and create if necessary.
+    """
     for path in paths:
         os.makedirs(path, exist_ok=True)
 
 # Function to split data into training, validation, and testing sets
 def split_data(input_data_path, labels_file_path, output_data_path):
+    """
+    Split data into training, validation, and testing sets, and save them to the specified output directory.
+
+    Parameters:
+    input_data_path (str): Path to the directory containing input images.
+    labels_file_path (str): Path to the file containing image labels.
+    output_data_path (str): Path to the directory to save the split data.
+    """
     # Ensure training, validation, and testing directories exist
     ensure_dirs([
         os.path.join(output_data_path, 'train', 'images'),
@@ -42,6 +57,14 @@ def split_data(input_data_path, labels_file_path, output_data_path):
     
     # Save images and labels
     def save_images(images, labels, set_name):
+        """
+        Save images and their corresponding labels to the specified set (train, val, or test).
+
+        Parameters:
+        images (array): Array of image filenames.
+        labels (array): Array of corresponding labels.
+        set_name (str): Name of the set (train, val, or test) to save the images and labels to.
+        """
         set_dir = os.path.join(output_data_path, set_name, 'images')
         labels_path = os.path.join(output_data_path, set_name, 'labels.txt')
         with open(labels_path, 'w') as f:
@@ -51,6 +74,7 @@ def split_data(input_data_path, labels_file_path, output_data_path):
                 shutil.copy(src_image_path, dest_image_path)
                 f.write(f'{images[i]} {labels[i]}\n')
 
+    # Save train, validation, and test sets
     save_images(train_images, train_labels, 'train')
     save_images(val_images, val_labels, 'val')
     save_images(test_images, test_labels, 'test')

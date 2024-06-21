@@ -10,6 +10,15 @@ from singleclass_model import get_model
 # Custom Dataset
 class LeatherDataset(Dataset):
     def __init__(self, image_dir, mask_dir, image_transform=None, mask_transform=None):
+        """
+        Initialize the custom dataset for leather images and masks.
+
+        Parameters:
+        image_dir (str): Directory containing the images.
+        mask_dir (str): Directory containing the masks.
+        image_transform (callable, optional): Optional transform to be applied on images.
+        mask_transform (callable, optional): Optional transform to be applied on masks.
+        """
         self.image_dir = image_dir
         self.mask_dir = mask_dir
         self.image_transform = image_transform
@@ -17,9 +26,21 @@ class LeatherDataset(Dataset):
         self.image_files = os.listdir(image_dir)
     
     def __len__(self):
+        """
+        Return the total number of samples.
+        """
         return len(self.image_files)
     
     def __getitem__(self, idx):
+        """
+        Get a sample from the dataset.
+
+        Parameters:
+        idx (int): Index of the sample to retrieve.
+
+        Returns:
+        tuple: (image, mask) where image is the transformed image and mask is the corresponding transformed mask.
+        """
         img_path = os.path.join(self.image_dir, self.image_files[idx])
         mask_path = os.path.join(self.mask_dir, self.image_files[idx].replace('_image', '_mask'))
         
@@ -34,16 +55,38 @@ class LeatherDataset(Dataset):
 
 # Ensure directory exists
 def ensure_dir(directory):
+    """
+    Ensure that the directory exists. If it does not, create it.
+
+    Parameters:
+    directory (str): Path to the directory.
+    """
     if not os.path.exists(directory):
         os.makedirs(directory)
 
 # Dice Loss Function
 class DiceLoss(nn.Module):
     def __init__(self, smooth=1e-6):
+        """
+        Initialize the Dice loss function.
+
+        Parameters:
+        smooth (float): Smoothing factor to avoid division by zero.
+        """
         super(DiceLoss, self).__init__()
         self.smooth = smooth
 
     def forward(self, y_pred, y_true):
+        """
+        Forward pass for Dice loss calculation.
+
+        Parameters:
+        y_pred (Tensor): Predicted mask.
+        y_true (Tensor): Ground truth mask.
+
+        Returns:
+        Tensor: Calculated Dice loss.
+        """
         y_pred = y_pred.contiguous()
         y_true = y_true.contiguous()
         
@@ -55,12 +98,28 @@ class DiceLoss(nn.Module):
 # Combined Loss Function
 class CombinedLoss(nn.Module):
     def __init__(self, bce_weight=0.5):
+        """
+        Initialize the combined loss function (BCE + Dice).
+
+        Parameters:
+        bce_weight (float): Weight for BCE loss in the combined loss.
+        """
         super(CombinedLoss, self).__init__()
         self.bce_loss = nn.BCELoss()
         self.dice_loss = DiceLoss()
         self.bce_weight = bce_weight
 
     def forward(self, y_pred, y_true):
+        """
+        Forward pass for combined loss calculation.
+
+        Parameters:
+        y_pred (Tensor): Predicted mask.
+        y_true (Tensor): Ground truth mask.
+
+        Returns:
+        Tensor: Calculated combined loss.
+        """
         bce = self.bce_loss(y_pred, y_true)
         dice = self.dice_loss(y_pred, y_true)
         return self.bce_weight * bce + (1 - self.bce_weight) * dice
@@ -73,11 +132,12 @@ patience = 5  # For early stopping
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Paths
-image_dir = '/home/paperspace/Projects/ManufacturingAnomalyDetection/training_data/transistor/train/images'
-mask_dir = '/home/paperspace/Projects/ManufacturingAnomalyDetection/training_data/transistor/train/masks'
-val_image_dir = '/home/paperspace/Projects/ManufacturingAnomalyDetection/training_data/transistor/val/images'
-val_mask_dir = '/home/paperspace/Projects/ManufacturingAnomalyDetection/training_data/transistor/val/masks'
-model_save_dir = '/home/paperspace/Projects/ManufacturingAnomalyDetection/models/transistor'
+path = ''
+image_dir = f'{path}/training_data/transistor/train/images'
+mask_dir = f'{path}/training_data/transistor/train/masks'
+val_image_dir = f'{path}/training_data/transistor/val/images'
+val_mask_dir = f'{path}/training_data/transistor/val/masks'
+model_save_dir = f'{path}/models/transistor'
 
 # Ensure the model directory exists
 ensure_dir(model_save_dir)
@@ -114,6 +174,16 @@ best_val_loss = float('inf')
 
 # Training Loop
 def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
+    """
+    Train the model.
+
+    Parameters:
+    model (nn.Module): The model to train.
+    criterion (nn.Module): The loss function.
+    optimizer (Optimizer): The optimizer to use.
+    scheduler (lr_scheduler): The learning rate scheduler.
+    num_epochs (int): The number of epochs to train for.
+    """
     global best_val_loss, early_stopping_counter
     for epoch in range(num_epochs):
         model.train()
@@ -154,6 +224,17 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
             break
 
 def validate_model(model, criterion, val_loader):
+    """
+    Validate the model.
+
+    Parameters:
+    model (nn.Module): The model to validate.
+    criterion (nn.Module): The loss function.
+    val_loader (DataLoader): The validation dataloader.
+
+    Returns:
+    float: The average validation loss.
+    """
     model.eval()
     val_loss = 0.0
     with torch.no_grad():

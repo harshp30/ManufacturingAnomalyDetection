@@ -8,11 +8,20 @@ from sklearn.metrics import accuracy_score
 
 class CustomDataset(Dataset):
     def __init__(self, image_dir, labels_path, transforms=None):
+        """
+        Initialize the custom dataset.
+
+        Parameters:
+        image_dir (str): Directory containing the images.
+        labels_path (str): Path to the labels file.
+        transforms (callable, optional): Optional transform to be applied on a sample.
+        """
         self.image_dir = image_dir
         self.transforms = transforms
         self.images = []
         self.labels = []
 
+        # Read the labels file and populate the images and labels lists
         with open(labels_path, 'r') as f:
             for line in f:
                 parts = line.strip().split()
@@ -23,9 +32,21 @@ class CustomDataset(Dataset):
                     self.labels.append(label)
 
     def __len__(self):
+        """
+        Return the total number of samples.
+        """
         return len(self.images)
 
     def __getitem__(self, idx):
+        """
+        Get a sample from the dataset.
+
+        Parameters:
+        idx (int): Index of the sample to retrieve.
+
+        Returns:
+        tuple: (image, label) where image is the transformed image and label is the corresponding label.
+        """
         img_path = os.path.join(self.image_dir, self.images[idx])
         image = Image.open(img_path).convert("RGB")
         label = self.labels[idx]
@@ -40,9 +61,10 @@ batch_size = 8
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Paths
-test_image_dir = '/home/paperspace/Projects/ManufacturingAnomalyDetection/training_data/classification/test/images'
-test_labels_path = '/home/paperspace/Projects/ManufacturingAnomalyDetection/training_data/classification/test/labels.txt'
-model_path = '/home/paperspace/Projects/ManufacturingAnomalyDetection/models/classification/model.pth'
+path = ''
+test_image_dir = f'{path}/training_data/classification/test/images'
+test_labels_path = f'{path}/training_data/classification/test/labels.txt'
+model_path = f'{path}/models/classification/model.pth'
 
 # Data transforms
 transform = transforms.Compose([

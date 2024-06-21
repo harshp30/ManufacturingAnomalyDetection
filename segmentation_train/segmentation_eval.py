@@ -9,10 +9,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Paths
-test_image_dir = '/home/paperspace/Projects/ManufacturingAnomalyDetection/training_data/transistor/test/images'
-test_mask_dir = '/home/paperspace/Projects/ManufacturingAnomalyDetection/training_data/transistor/test/masks'
-path = '/home/paperspace/Projects/ManufacturingAnomalyDetection/models/transistor'
-model_path = '/home/paperspace/Projects/ManufacturingAnomalyDetection/models/transistor/model.pth'
+path = ''
+test_image_dir = f'{path}/training_data/transistor/test/images'
+test_mask_dir = f'{path}/training_data/transistor/test/masks'
+path = f'{path}/models/transistor'
+model_path = f'{path}/models/transistor/model.pth'
 
 # Hyperparameters
 batch_size = 8
@@ -24,6 +25,7 @@ resize_size = (256, 256)
 image_transform = transforms.Compose([
     transforms.Resize(resize_size),
     transforms.ToTensor(),
+    # Uncomment the following line if normalization is needed
     # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
@@ -42,6 +44,17 @@ model.load_state_dict(torch.load(model_path))
 
 # IoU Calculation
 def calculate_iou(pred, mask, threshold=0.5):
+    """
+    Calculate the Intersection over Union (IoU) between the predicted mask and the true mask.
+
+    Parameters:
+    pred (Tensor): The predicted mask.
+    mask (Tensor): The ground truth mask.
+    threshold (float): The threshold to binarize the predicted mask.
+
+    Returns:
+    Tensor: The IoU value.
+    """
     pred = (pred > threshold).float()
     intersection = (pred * mask).sum()
     union = (pred + mask).sum() - intersection
@@ -52,6 +65,16 @@ def calculate_iou(pred, mask, threshold=0.5):
 
 # Visualize the image, predicted mask, and actual mask
 def visualize(image, pred_mask, true_mask, iou, idx):
+    """
+    Visualize the input image, predicted mask, and true mask, and save the visualization.
+
+    Parameters:
+    image (Tensor): The input image.
+    pred_mask (Tensor): The predicted mask.
+    true_mask (Tensor): The ground truth mask.
+    iou (float): The IoU value.
+    idx (int): The index of the image.
+    """
     image = image.permute(1, 2, 0).cpu().numpy()
     pred_mask = pred_mask.squeeze().cpu().numpy()
     true_mask = true_mask.squeeze().cpu().numpy()
@@ -73,6 +96,13 @@ def visualize(image, pred_mask, true_mask, iou, idx):
 
 # Evaluate model
 def evaluate_model(model, test_loader):
+    """
+    Evaluate the model on the test dataset.
+
+    Parameters:
+    model (nn.Module): The trained model.
+    test_loader (DataLoader): The DataLoader for the test dataset.
+    """
     model.eval()
     total_iou = 0.0
     with torch.no_grad():
@@ -83,7 +113,7 @@ def evaluate_model(model, test_loader):
                 iou = calculate_iou(outputs[i], masks[i])
                 total_iou += iou.item()
                 # Visualize predictions
-                visualize(images[i], outputs[i], masks[i], iou, idx*batch_size + i)
+                visualize(images[i], outputs[i], masks[i], iou, idx * batch_size + i)
     
     avg_iou = total_iou / len(test_loader.dataset)
     print(f'Average IoU: {avg_iou:.4f}')

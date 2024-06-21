@@ -67,13 +67,32 @@ class_labels_rev = {v: k for k, v in class_labels.items()}
 # Custom Dataset for Inference
 class InferenceDataset(Dataset):
     def __init__(self, image_paths, transforms=None):
+        """
+        Initialize the custom dataset for inference.
+
+        Parameters:
+        image_paths (list): List of image file paths.
+        transforms (callable, optional): Optional transform to be applied on an image.
+        """
         self.image_paths = image_paths
         self.transforms = transforms
 
     def __len__(self):
+        """
+        Return the total number of samples.
+        """
         return len(self.image_paths)
 
     def __getitem__(self, idx):
+        """
+        Get a sample from the dataset.
+
+        Parameters:
+        idx (int): Index of the sample to retrieve.
+
+        Returns:
+        tuple: (image, img_path) where image is the transformed image and img_path is the image file path.
+        """
         img_path = self.image_paths[idx]
         image = Image.open(img_path).convert("RGB")
         
@@ -84,22 +103,36 @@ class InferenceDataset(Dataset):
 
 # Ensure directory exists
 def ensure_dir(directory):
+    """
+    Ensure that the directory exists. If it does not, create it.
+
+    Parameters:
+    directory (str): Path to the directory.
+    """
     if not os.path.exists(directory):
         os.makedirs(directory)
 
 # Function to get the segmentation model
 def get_segmentation_model():
+    """
+    Get the segmentation model.
+
+    Returns:
+    nn.Module: The segmentation model.
+    """
     return ResNetUNet(n_classes=1)
 
 # Hyperparameters
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Paths
-image_path = '/home/paperspace/Projects/ManufacturingAnomalyDetection/training_data/cable/test/images/test_image_0.png'
-segmentation_models_base_path = '/home/paperspace/Projects/ManufacturingAnomalyDetection/models'
-output_dir = '/home/paperspace/Projects/ManufacturingAnomalyDetection/output'
-classification_model_path = '/home/paperspace/Projects/ManufacturingAnomalyDetection/models/classification/model.pth'
+path = ''
+image_path = f'{path}/training_data/cable/test/images/test_image_0.png'
+segmentation_models_base_path = f'{path}/models'
+output_dir = f'{path}/output'
+classification_model_path = f'{path}/models/classification/model.pth'
 
+# Ensure the output directory exists
 ensure_dir(output_dir)
 
 # Transforms
@@ -120,6 +153,15 @@ classification_model.eval()
 
 # Function to save results
 def save_results(image, pred_mask, classification, idx):
+    """
+    Save the inference results.
+
+    Parameters:
+    image (Tensor): The input image.
+    pred_mask (Tensor): The predicted mask.
+    classification (str): The predicted class label.
+    idx (int): The index of the sample.
+    """
     image = image.permute(1, 2, 0).cpu().numpy()
     pred_mask = pred_mask.squeeze().cpu().numpy()
 
@@ -132,11 +174,17 @@ def save_results(image, pred_mask, classification, idx):
     axs[1].set_title(f'Predicted Mask\nClass: {classification}')
     axs[1].axis('off')
 
-    plt.savefig(os.path.join(output_dir, f'result.png'))
+    plt.savefig(os.path.join(output_dir, f'result_{idx}.png'))
     plt.close()
 
 # Inference function
 def inference(dataloader):
+    """
+    Perform inference on the dataset.
+
+    Parameters:
+    dataloader (DataLoader): The dataloader for the dataset.
+    """
     with torch.no_grad():
         for idx, (images, filenames) in enumerate(dataloader):
             images = [image.to(device) for image in images]

@@ -5,11 +5,18 @@ import numpy as np
 import albumentations as A
 
 # Paths
-stripped_data_path = '/home/paperspace/Projects/ManufacturingAnomalyDetection/anomaly_data/classification'
-augmented_data_path = '/home/paperspace/Projects/ManufacturingAnomalyDetection/augmented_data/classification'
+path = ''
+stripped_data_path = f'{path}/anomaly_data/classification'
+augmented_data_path = f'{path}/augmented_data/classification'
 
 # Ensure directories exist
 def ensure_dirs(paths):
+    """
+    Ensure that the directories in the given list exist. If they do not exist, create them.
+
+    Parameters:
+    paths (list of str): List of directory paths.
+    """
     for path in paths:
         os.makedirs(path, exist_ok=True)
 
@@ -30,7 +37,16 @@ augmentation_pipeline = A.Compose([
 
 # Function to perform augmentation
 def augment_data(stripped_data_path, augmented_data_path, num_augmentations=5, seed=42):
-    # Set random seed
+    """
+    Perform data augmentation on images and their corresponding masks.
+
+    Parameters:
+    stripped_data_path (str): Path to the directory containing the original images.
+    augmented_data_path (str): Path to the directory to save the augmented images.
+    num_augmentations (int, optional): Number of augmentations to generate per image. Default is 5.
+    seed (int, optional): Random seed for reproducibility. Default is 42.
+    """
+    # Set random seed for reproducibility
     random.seed(seed)
     np.random.seed(seed)
     
@@ -58,6 +74,7 @@ def augment_data(stripped_data_path, augmented_data_path, num_augmentations=5, s
             aug_image_filename = image_file.replace('_image.png', f'_aug_{i}_image.png')
             aug_mask_filename = image_file.replace('_image.png', f'_aug_{i}_mask.png')
 
+            # Save augmented image and mask
             cv2.imwrite(os.path.join(augmented_data_path, aug_image_filename), aug_image)
             if mask is not None:
                 cv2.imwrite(os.path.join(augmented_data_path, aug_mask_filename), aug_mask)

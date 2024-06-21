@@ -2,9 +2,10 @@ import os
 import shutil
 
 # Paths
-augmented_data_path = '/home/paperspace/Projects/ManufacturingAnomalyDetection/augmented_data/classification'
-output_data_path = '/home/paperspace/Projects/ManufacturingAnomalyDetection/classification_data/classification_images'
-labels_file_path = '/home/paperspace/Projects/ManufacturingAnomalyDetection/classification_data/labels.txt'
+path = ''
+augmented_data_path = f'{path}/augmented_data/classification'
+output_data_path = f'{path}/classification_data/classification_images'
+labels_file_path = f'{path}/classification_data/labels.txt'
 
 # Ensure the output directory exists
 os.makedirs(output_data_path, exist_ok=True)
